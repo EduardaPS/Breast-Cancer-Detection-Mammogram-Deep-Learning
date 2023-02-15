@@ -115,7 +115,7 @@ class CnnModel:
         :param learning_rate: The initial learning rate for the optimiser.
         :return: None
         """
-        if config.dataset == "CBIS-DDSM" or config.dataset == "mini-MIAS-binary":
+        if config.dataset == "CBIS-DDSM" or config.dataset == "mini-MIAS-binary" or config.dataset == "mini-MIAS-Test":
             self._model.compile(optimizer=Adam(learning_rate),
                                 loss=BinaryCrossentropy(),
                                 metrics=[BinaryAccuracy()])
@@ -144,6 +144,21 @@ class CnnModel:
             patience = int(config.max_epoch_unfrozen / 10)
 
         if config.dataset == "mini-MIAS":
+            self.history = self._model.fit(
+                x=X_train,
+                y=y_train,
+                # class_weight=class_weights,
+                batch_size=config.batch_size,
+                steps_per_epoch=len(X_train) // config.batch_size,
+                validation_data=(X_val, y_val),
+                validation_steps=len(X_val) // config.batch_size,
+                epochs=max_epochs,
+                callbacks=[
+                    EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True),
+                    ReduceLROnPlateau(patience=int(patience / 2))
+                ]
+            )
+        elif config.dataset == "mini-MIAS-Test":
             self.history = self._model.fit(
                 x=X_train,
                 y=y_train,
@@ -191,7 +206,7 @@ class CnnModel:
         :param x: The input.
         :return: The model predictions (labels, not probabilities).
         """
-        if config.dataset == "mini-MIAS" or config.dataset == "mini-MIAS-binary":
+        if config.dataset == "mini-MIAS" or config.dataset == "mini-MIAS-binary" or config.dataset == "mini-MIAS-Test":
             self.prediction = self._model.predict(x=x.astype("float32"), batch_size=config.batch_size)
         elif config.dataset == "CBIS-DDSM":
             self.prediction = self._model.predict(x=x)
@@ -244,7 +259,7 @@ class CnnModel:
             data = json.load(config_file)
 
         dataset_key = config.dataset
-        if config.dataset == "mini-MIAS-binary":
+        if config.dataset == "mini-MIAS-binary" or config.dataset == "mini-MIAS-Test":
             dataset_key = "mini-MIAS"
 
         df = pd.DataFrame.from_records(data[dataset_key][classification_type],
@@ -263,7 +278,7 @@ class CnnModel:
         """
         # Scratch space
         self._model.save(
-            "/cs/scratch/agj6/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_saved-model.h5".format(
+            "/home/eduarda/tcc/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_saved-model.h5".format(
                 config.dataset,
                 config.mammogram_type,
                 config.model,
@@ -283,7 +298,7 @@ class CnnModel:
         if self.model_name == "VGG-common" or self.model_name == "MobileNet":
             print("Saving all weights")
             self._model.save_weights(
-                "/cs/scratch/agj6/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_all_weights.h5".format(
+                "/home/eduarda/tcc/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_all_weights.h5".format(
                     config.dataset,
                     config.mammogram_type,
                     config.model,
@@ -297,7 +312,7 @@ class CnnModel:
             print("Saving {} layer weights".format(self._model.layers[2].name))
             weights_and_biases = self._model.layers[2].get_weights()
             np.save(
-                "/cs/scratch/agj6/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_fc_weights.npy".format(
+                "/home/eduarda/tcc/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_fc_weights.npy".format(
                     config.dataset,
                     config.mammogram_type,
                     config.model,
@@ -317,10 +332,10 @@ class CnnModel:
         """
         print("Loading all layers mini-MIAS-binary weights from h5 file.")
         self._model.load_weights(
-            "/cs/scratch/agj6/saved_models/dataset-mini-MIAS-binary_mammogramtype-all_model-MobileNet_lr-0.0001_b-2_e1-150_e2-50_roi-False__all_weights.h5"
+            "/home/eduarda/tcc/saved_models/dataset-mini-MIAS-binary_mammogramtype-all_model-MobileNet_lr-0.0001_b-2_e1-150_e2-50_roi-False__all_weights.h5"
         )
         # self._model.load_weights(
-        #     "/cs/scratch/agj6/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_all_weights.h5".format(
+        #     "/home/eduarda/tcc/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_all_weights.h5".format(
         #         config.dataset,
         #         config.mammogram_type,
         #         config.model,
@@ -339,10 +354,10 @@ class CnnModel:
         """
         print("Loading only FC layers mini-MIAS-binary weights from npy file.")
         weights = np.load(
-            "/cs/scratch/agj6/saved_models/dataset-mini-MIAS-binary_mammogramtype-all_model-MobileNet_lr-0.0001_b-2_e1-150_e2-50_roi-False__fc_weights.npy"
+            "/home/eduarda/tcc/saved_models/dataset-mini-MIAS-binary_mammogramtype-all_model-MobileNet_lr-0.0001_b-2_e1-150_e2-50_roi-False__fc_weights.npy"
         )
         # weights = np.load(
-        #     "/cs/scratch/agj6/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_fc_weights.npy".format(
+        #     "/home/eduarda/tcc/saved_models/dataset-{}_mammogramtype-{}_model-{}_lr-{}_b-{}_e1-{}_e2-{}_roi-{}_{}_fc_weights.npy".format(
         #         config.dataset,
         #         config.mammogram_type,
         #         config.model,
@@ -423,7 +438,7 @@ def test_model_evaluation(y_true: list, predictions, label_encoder: LabelEncoder
         data = json.load(config_file)
 
     dataset_key = config.dataset
-    if config.dataset == "mini-MIAS-binary":
+    if config.dataset == "mini-MIAS-binary" or config.dataset == "mini-MIAS-Test":
         dataset_key = "mini-MIAS"
 
     df = pd.DataFrame.from_records(data[dataset_key][classification_type],

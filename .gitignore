@@ -1,5 +1,13 @@
 # Local files
 
+code/libraries/tf2
+**/*.png
+**/*.OVERLAY
+**/*.PGM
+**/*.pgm
+**/*.16_PGM
+**/*.ics
+**/*.LJPEG
 code/data/mini-MIAS/images_original
 code/data/mini-MIAS/images_processed
 code/data/mini-MIAS/images_png

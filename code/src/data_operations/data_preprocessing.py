@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 from tensorflow.keras.utils import to_categorical
+from .function import procesamento
 
 import config
 
@@ -111,8 +112,10 @@ def preprocess_image(image_path: str) -> np.ndarray:
     # Do not resize if using cropped ROI image.
     else:
         image = load_img(image_path, color_mode="grayscale")
-
+    #pré processamento
+    
     image = img_to_array(image)
+    image = procesamento(image)
     image /= 255.0
     return image
 

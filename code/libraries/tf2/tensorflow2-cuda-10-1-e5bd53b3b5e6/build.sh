@@ -3,7 +3,7 @@
 # Uncomment to log all commands as they run
 #set -x
 
-PYTHON=/usr/local/python/bin/python3.7
+PYTHON=/usr/local/bin/python3.7
 CUDA_LIBRARY_PATH=/usr/local/cuda-10.1/lib64
 VENV_PATH=${PWD}/venv
 

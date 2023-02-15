@@ -49,7 +49,6 @@ def main() -> None:
             X_train, X_val, y_train, y_val = dataset_stratified_split(split=0.25,
                                                                       dataset=X_train,
                                                                       labels=y_train)
-
             # Calculate class weights.
             class_weights = calculate_class_weights(y_train, l_e)
 
@@ -71,9 +70,8 @@ def main() -> None:
                 print("Validation set size: {}".format(X_val.shape[0]))
                 print("Test set size: {}".format(X_test.shape[0]))
             model.train_model(X_train, X_val, y_train, y_val, class_weights)
-
         # Binary classification (binarised mini-MIAS dataset)
-        elif config.dataset == "mini-MIAS-binary":
+        elif config.dataset in ("mini-MIAS-binary", "mini-MIAS-Test"):
             # Import entire dataset.
             images, labels = import_minimias_dataset(data_dir="../data/{}/images_processed".format(config.dataset),
                                                      label_encoder=l_e)
@@ -130,6 +128,9 @@ def main() -> None:
         elif config.dataset == "mini-MIAS-binary":
             model.make_prediction(X_val)
             model.evaluate_model(y_val, l_e, 'B-M', runtime)
+        elif config.dataset == "mini-MIAS-Test":
+            model.make_prediction(X_val)
+            model.evaluate_model(y_val, l_e, 'N-M', runtime)
         elif config.dataset == "CBIS-DDSM":
             model.make_prediction(validation_dataset)
             model.evaluate_model(y_val, l_e, 'B-M', runtime)
@@ -144,7 +145,7 @@ def main() -> None:
         start_time = time.time()
 
         # Test multi-class classification (mini-MIAS dataset).
-        if config.dataset == "mini-MIAS":
+        if config.dataset in ("mini-MIAS", "mini-MIAS-Test"):
             images, labels = import_minimias_dataset(data_dir="../data/{}/images_processed".format(config.dataset),
                                                      label_encoder=l_e)
             _, X_test, _, y_test = dataset_stratified_split(split=0.20, dataset=images, labels=labels)
@@ -235,8 +236,19 @@ def parse_command_line_arguments() -> None:
                         default="",
                         help="The name of the experiment being tested. Defaults to an empty string."
                         )
+    parser.add_argument("-f", "--fundo",
+                        action="store_true",
+                        help="Remover o fundo da figura")
+    parser.add_argument("-w", "--wavelet",
+                        action="store_true",
+                        help="Utilizar denoise wavelet")
+    parser.add_argument("--salvar",
+                        action="store_true")
 
     args = parser.parse_args()
+    config.salvar = args.salvar
+    config.wavelet = args.wavelet
+    config.fundo = args.fundo
     config.dataset = args.dataset
     config.mammogram_type = args.mammogramtype
     config.model = args.model

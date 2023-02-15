@@ -141,7 +141,7 @@
 #         print("Score: {}".format(gs_results.best_score_))
 #         joblib.dump(
 #             final_model,
-#             "/cs/scratch/agj6/saved_models/dataset-{}_model-{}_b-{}_e1-{}_e2-{}_gs-best-estimator.pkl".format(
+#             "/home/eduarda/tcc/saved_models/dataset-{}_model-{}_b-{}_e1-{}_e2-{}_gs-best-estimator.pkl".format(
 #                 config.dataset,
 #                 config.model,
 #                 config.batch_size,

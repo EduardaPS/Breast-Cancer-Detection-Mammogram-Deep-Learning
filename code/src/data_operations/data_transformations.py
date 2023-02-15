@@ -149,7 +149,7 @@ def get_class_balances(y_vals):
         for y_val in y_vals:
             for i in range(num_classes):
                 counts[i] += y_val[i]
-    elif config.dataset == "mini-MIAS-binary":
+    elif config.dataset in ("mini-MIAS-binary", "mini-MIAS-Test"):
         num_classes = 2
         counts = np.zeros(num_classes)
         for y_val in y_vals:
